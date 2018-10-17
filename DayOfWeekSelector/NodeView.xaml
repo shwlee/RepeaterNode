@@ -1,0 +1,197 @@
+﻿<UserControl x:Class="DayOfWeekSelector.NodeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DayOfWeekSelector"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local:BoolFromSourceMatchConverter x:Key="BoolFromSourceMatchConverter"/>
+
+        <DataTemplate x:Key="HourItems" DataType="{x:Type system:TimeSpan}">
+            <Grid>
+                <TextBlock Text="{Binding Hours, StringFormat={}{0:00}}"></TextBlock>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="MinuiteItems" DataType="{x:Type system:TimeSpan}">
+            <Grid>
+                <TextBlock Text="{Binding Minutes, StringFormat={}{0:00}}"></TextBlock>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="SecondItems" DataType="{x:Type system:TimeSpan}">
+            <Grid>
+                <TextBlock Text="{Binding Seconds, StringFormat={}{0:00}}"></TextBlock>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="HourUnit" DataType="{x:Type system:TimeSpan}">
+            <Grid>
+                <TextBlock Text="{Binding StringFormat=hh\\:mm}"></TextBlock>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="AUTO" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Grid.ColumnSpan="2">
+            <CheckBox x:Name="xUseRepeat" Content="Repeat"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1" IsEnabled="{Binding IsChecked, ElementName=xUseRepeat}" Margin="0,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO" />
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="AUTO" />
+                    <RowDefinition Height="AUTO"/>
+                    <RowDefinition Height="AUTO"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="5">
+                    <RadioButton x:Name="xInterval" Content="INTERVAL" GroupName="ScheduleType" 
+                                 IsChecked="{Binding ScheduleType, Converter={StaticResource BoolFromSourceMatchConverter}, ConverterParameter={x:Static local:ScheduleTypes.Interval}}"/>
+                </Grid>
+
+                <StackPanel IsEnabled="{Binding IsChecked, ElementName=xInterval}" Grid.Row="1" Grid.Column="1">
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <TextBlock Text="Every " Margin="5" VerticalAlignment="Center" />
+                        <TextBox Width="100" Text="{Binding Interval, UpdateSourceTrigger=PropertyChanged}" Margin="5" VerticalAlignment="Center"/>
+                        <ComboBox ItemsSource="{x:Static local:TimeUnit+TimeUnits.UnitSet}" Width="70" Margin="5" VerticalAlignment="Center">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <TextBlock Text="{Binding UnitName}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20" />
+                            <RowDefinition Height="AUTO" />
+                        </Grid.RowDefinitions>
+
+                        <CheckBox x:Name="xBetweenTimes" Grid.Row="0" Content="Between times"/>
+                        <StackPanel IsEnabled="{Binding IsChecked, ElementName=xBetweenTimes}" Grid.Row="1">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox ItemsSource="{x:Static local:TimeSet.Hours}" 
+                                          SelectedItem="{Binding StartTime}" 
+                                          ItemTemplate="{StaticResource HourUnit}" Width="100"/>
+                                <TextBlock Text=" ~ "/>
+                                <ComboBox ItemsSource="{x:Static local:TimeSet.Hours}" 
+                                          SelectedItem="{Binding EndTime}" 
+                                          ItemTemplate="{StaticResource HourUnit}" Width="100"/>
+                            </StackPanel>
+
+                            <Border BorderThickness="1" BorderBrush="#FFA7A6A2" Margin="0,5">
+                                <ItemsControl ItemsSource="{Binding IntervalDaySelections}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <ToggleButton IsChecked="{Binding IsSelected}" Width="100" Height="30" Content="{Binding Day}" Margin="1"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="AUTO" />
+                    <RowDefinition Height="AUTO"/>
+                    <RowDefinition Height="AUTO"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                    <RadioButton x:Name="xTimeTrigger" Content="TIME TRIGGER" GroupName="ScheduleType" 
+                                 IsChecked="{Binding ScheduleType, Converter={StaticResource BoolFromSourceMatchConverter}, ConverterParameter={x:Static local:ScheduleTypes.TimeTrigger}}"/>
+                </Grid>
+
+                <StackPanel IsEnabled="{Binding IsChecked, ElementName=xTimeTrigger}" Grid.Row="1" Grid.Column="1">
+                    <StackPanel Margin="0,5">
+                        <Button Content="+" Command="{Binding AddTimeSetCommand}" Height="30"></Button>
+                        <ItemsControl ItemsSource="{Binding TimeSets}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="60"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox ItemsSource="{x:Static local:TimeSet.Hours}" 
+                                              SelectedItem="{Binding SelectedHour}" 
+                                              ItemTemplate="{StaticResource HourItems}" Grid.Column="0" Margin="5"/>
+                                        <TextBlock Text=" : " Grid.Column="1" />
+                                        <ComboBox ItemsSource="{x:Static local:TimeSet.Minuiues}" 
+                                              SelectedItem="{Binding SelectedMinuite}" 
+                                              ItemTemplate="{StaticResource MinuiteItems}" Grid.Column="2" Margin="5"/>
+                                        <TextBlock Text=" : " Grid.Column="3"/>
+                                        <ComboBox ItemsSource="{x:Static local:TimeSet.Seconds}" 
+                                              SelectedItem="{Binding SelectedSecond}" 
+                                              ItemTemplate="{StaticResource SecondItems}" Grid.Column="4" Margin="5"/>
+                                        <Button Command="{Binding Path=DataContext.RemoveTimeSetCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}" 
+                                            CommandParameter="{Binding}"
+                                            Grid.Column="5"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <Border BorderThickness="1" BorderBrush="#FFA7A6A2" Margin="0,5">
+                        <ItemsControl ItemsSource="{Binding TimeTriggerDaySelections}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton IsChecked="{Binding IsSelected}" Width="100" Height="30" Content="{Binding Day}" Margin="1"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
